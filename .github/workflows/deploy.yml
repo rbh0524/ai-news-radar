@@ -1,0 +1,62 @@
+name: Deploy AI News Site
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+
+  # Scheduled: runs every 6 hours
+  schedule:
+    - cron: '0 */6 * * *'
+
+  # Also deploy on push to main
+  push:
+    branches: [ main ]
+
+# Sets permissions for GITHUB_TOKEN to deploy to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: 📦 Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: 📡 Fetch AI News
+        run: python scripts/fetch_news.py
+
+      - name: 🔨 Generate Static Site
+        run: python scripts/generate_site.py
+
+      - name: 📄 Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: 📤 Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'docs'
+
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
