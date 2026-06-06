@@ -49,6 +49,26 @@ def load_news() -> dict:
         return json.load(f)
 
 
+# 翻譯映射表（繁體中文為主，英文為副）
+CATEGORY_MAP = {
+    "Research": "學術研究 Research",
+    "Industry": "產業動態 Industry",
+    "Technology": "技術開發 Technology",
+    "Community": "社群討論 Community",
+}
+
+SOURCE_MAP = {
+    "TechCrunch AI": "TechCrunch AI 新聞 TechCrunch AI",
+    "The Verge": "The Verge 科技網 The Verge",
+    "MIT Technology Review": "麻省理工科技評論 MIT Technology Review",
+    "Google AI Blog": "Google AI 部落格 Google AI Blog",
+    "Wired AI": "連線雜誌 Wired AI",
+    "Ars Technica AI": "Ars Technica AI 技術 Ars Technica AI",
+    "VentureBeat AI": "VentureBeat AI 產業 VentureBeat AI",
+    "Hacker News": "Hacker News 社群 Hacker News",
+}
+
+
 def generate_site():
     """Generate the static HTML site."""
     print("🔨 Generating static site...\n")
@@ -88,6 +108,8 @@ def generate_site():
         generated_at=generated_at,
         generated_at_display=generated_at_display,
         now=datetime.now(timezone.utc),
+        category_map=CATEGORY_MAP,
+        source_map=SOURCE_MAP,
     )
 
     # Write output
