@@ -81,6 +81,33 @@ RSS_FEEDS = [
 ]
 
 
+def translate_text(text: str, target_lang: str = "zh-TW") -> str:
+    """Translate text to target language using Google Translate free API."""
+    import requests
+    if not text:
+        return ""
+    try:
+        url = "https://translate.googleapis.com/translate_a/single"
+        params = {
+            "client": "gtx",
+            "sl": "auto",
+            "tl": target_lang,
+            "dt": "t",
+            "q": text
+        }
+        headers = {
+            "User-Agent": "Mozilla/5.0 (compatible; Google-Translate/2.0)"
+        }
+        resp = requests.get(url, params=params, headers=headers, timeout=10)
+        resp.raise_for_status()
+        res_json = resp.json()
+        translated_text = "".join([sentence[0] for sentence in res_json[0] if sentence[0]])
+        return translated_text
+    except Exception as e:
+        print(f"  ⚠️ Translation failed for '{text[:20]}...': {e}")
+        return ""
+
+
 def generate_id(title: str, link: str) -> str:
     """Generate a unique ID for a news article."""
     raw = f"{title}:{link}"
@@ -166,9 +193,12 @@ def fetch_feed(feed_config: dict) -> list[dict]:
                 if not any(kw in combined for kw in ai_keywords):
                     continue
 
+            title_zh = translate_text(title)
+
             article = {
                 "id": generate_id(title, link),
                 "title": title,
+                "title_zh": title_zh,
                 "link": link,
                 "summary": clean_summary(summary) if summary else "",
                 "published": parse_date(entry).isoformat(),
